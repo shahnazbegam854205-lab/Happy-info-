@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/search.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "search.html", "use": "@vercel/static" },
