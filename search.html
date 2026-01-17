@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<title>⚡HAPPY 🤗 INFO TOOL ⚙️⚡</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<style>
+:root{
+  --neon: #00fff2;
+  --accent: #00ffaa;
+  --warn: #ffb84d;
+  --danger: #ff5566;
+  --bg: #000;
+  --kbd-height: 50vh;
+  --safe-bottom: env(safe-area-inset-bottom,12px);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:radial-gradient(circle at center,#070808 0%,#000 80%);font-family:'Share Tech Mono',monospace;color:var(--neon);-webkit-tap-highlight-color:transparent}
+
+/* ===== SIDEBAR MENU ===== */
+.menu-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  background: rgba(0,255,242,0.1);
+  border: 1px solid rgba(0,255,242,0.3);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  z-index: 10020;
+  transition: all 0.3s ease;
+}
+
+.menu-btn:hover {
+  background: rgba(0,255,242,0.2);
+  box-shadow: 0 0 15px rgba(0,255,242,0.3);
+}
+
+.menu-btn .line {
+  width: 20px;
+  height: 2px;
+  background: var(--neon);
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.menu-btn.active .line:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menu-btn.active .line:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-btn.active .line:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+.sidebar-menu {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba(5,5,6,0.98), rgba(3,3,4,0.97));
+  border-right: 2px solid rgba(0,255,200,0.2);
+  box-shadow: 0 0 40px rgba(0,0,0,0.9);
+  z-index: 10015;
+  padding: 20px 0;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-menu.open {
+  left: 0;
+}
+
+.menu-header {
+  text-align: center;
+  padding: 0 20px 20px 20px;
+  border-bottom: 1px solid rgba(0,255,242,0.2);
+  margin-bottom: 15px;
+}
+
+.menu-title {
+  font-size: 1.1rem;
+  color: var(--neon);
+  text-shadow: 0 0 10px var(--neon);
+  margin: 0 0 5px 0;
+}
+
+.menu-user {
+  color: #aaffff;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* MENU SECTIONS */
+.menu-section {
+  margin: 15px 0;
+  padding: 0 15px;
+}
+
+.section-title {
+  color: #00ffaa;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+  padding-left: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+.menu-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  background: rgba(0,12,12,0.3);
+  border: 1px solid rgba(0,255,242,0.1);
+  border-radius: 8px;
+  color: var(--neon);
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.menu-link:hover {
+  background: rgba(0,255,242,0.1);
+  border-color: var(--neon);
+  transform: translateX(5px);
+  box-shadow: 0 0 15px rgba(0,255,242,0.2);
+}
+
+.menu-link i {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.menu-link.badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-tag {
+  background: #ff3366;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.menu-footer {
+  padding: 15px;
+  text-align: center;
+  border-top: 1px solid rgba(0,255,242,0.1);
+  margin-top: 20px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(90deg, #ff5555, #ff3366);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255,85,102,0.4);
+}
+
+/* PREMIUM BADGE */
+.premium-badge {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  color: #000;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  z-index: 10020;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.container-wrap{display:flex;justify-content:center;padding:18px 12px;}
+.container{
+  width:100%;
+  max-width:920px;
+  background:linear-gradient(180deg, rgba(5,5,6,0.95), rgba(3,3,4,0.95));
+  border-radius:16px;
+  padding:18px;
+  position:relative;
+  overflow:visible;
+  text-align:center;
+  border: 2px solid rgba(0,255,200,0.06);
+  box-shadow:0 0 20px rgba(0,255,242,0.3),0 0 40px rgba(0,255,242,0.2),0 0 60px rgba(0,255,242,0.1);
+}
+.container::before{
+  content:'';
+  position:absolute;
+  inset:-10px;
+  border-radius:22px;
+  background: linear-gradient(90deg, rgba(0,255,242,0.12), rgba(0,170,170,0.08), rgba(255,170,0,0.06), rgba(255,50,100,0.04) );
+  filter: blur(18px);
+  opacity:0.8;
+  animation: pulseGlow 3s ease-in-out infinite alternate;
+  pointer-events:none;
+  z-index:0;
+}
+.container > *{position:relative; z-index:1;}
+@keyframes pulseGlow{
+  0%{transform:scale(1); opacity:0.5}
+  50%{transform:scale(1.04); opacity:1}
+  100%{transform:scale(1); opacity:0.5}
+}
+.header h1{margin:0;font-size:1.4rem;color:var(--neon);text-shadow:0 0 10px var(--neon)}
+.header p{color:#bff;margin:6px 0 12px 0;font-size:0.95rem}
+
+/* PROFILE CONTAINER - TOP LEFT (DEVELOPER WALA) - MOVED RIGHT FOR MENU */
+.profile-container{
+  position:fixed;
+  top:14px;
+  left:70px; /* Menu ke baad shift kiya */
+  display:flex;
+  align-items:center;
+  gap:8px;
+  z-index:10010;
+}
+
+/* PROFILE IMAGE - SIRF ICON GOLD GLOW */
+.profile-container img{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  cursor:pointer;
+  object-fit:cover;
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6),
+              0 0 30px rgba(255, 215, 0, 0.3);
+  animation: goldPulse 2s ease-in-out infinite;
+}
+
+.profile-text{
+  color:var(--neon); 
+  font-size:0.9rem; 
+  cursor:pointer;
+}
+
+@keyframes goldPulse {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4),
+                0 0 20px rgba(255, 215, 0, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8),
+                0 0 40px rgba(255, 215, 0, 0.4);
+  }
+}
+
+/* SEARCH INPUT - WAPAS PEHLE JAISA (NO GLOW) */
+#lookupInput{
+  width:92%;
+  max-width:420px;
+  margin:10px auto;
+  padding:12px;
+  border-radius:12px;
+  border:2px solid rgba(0,255,242,0.12);
+  background:rgba(0,12,12,0.65);
+  color:var(--warn);
+  font-size:18px;
+  text-align:center;
+  outline:none;
+  box-shadow: inset 0 -6px 20px rgba(0,0,0,0.4);
+}
+#lookupInput::placeholder{color:#3fd}
+.actions{display:flex;gap:12px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.btn{
+  padding:10px 18px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--neon),var(--accent));color:#000;font-weight:700;cursor:pointer;min-width:120px;
+  box-shadow: 0 6px 18px rgba(0,255,180,0.06);
+}
+.btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+.btn-secondary {
+  background: linear-gradient(90deg, #666, #888);
+}
+#terminal{
+  width:92%;
+  max-width:920px;
+  margin:16px auto 80px auto;
+  background:#000;
+  border-radius:12px;
+  border:1px solid rgba(0,255,204,0.06);
+  padding:12px;
+  color:#7CFC00;
+  min-height:260px;
+  max-height:48vh;
+  overflow:auto;
+  white-space:pre-wrap;
+  font-size:0.9rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+.line { display:block; margin:2px 0; font-family:'Share Tech Mono',monospace; font-size:0.92rem; line-height:1.3; }
+.c1{color:#00ffd5}
+.c2{color:#ff66ff}
+.c3{color:#00ff88}
+.c4{color:#ffaa00}
+.c5{color:#ff5555}
+.terminal-link{color:#00fff2;text-decoration:underline;cursor:pointer;animation:blinkLink 2s infinite ease-in-out;}
+
+/* PROFILE OVERLAY - DEVELOPER WALA */
+.profile-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,0.55); display:none; align-items:center; justify-content:center; z-index:10005;
+}
+.profile-overlay.open{ display:flex; }
+.profile-card{
+  width:340px; max-width:92%; border-radius:12px; padding:18px; background:linear-gradient(180deg, rgba(6,6,8,0.95), rgba(4,4,6,0.95)); border:1px solid rgba(0,255,204,0.06);
+  box-shadow: 0 20px 70px rgba(0,0,0,0.7), 0 0 40px rgba(0,255,200,0.06);
+  text-align:left;
+  position:relative;
+}
+.profile-head{ display:flex; gap:12px; align-items:center; margin-bottom:8px; }
+.hacker-logo{
+  width:100px; height:100px;
+  background:linear-gradient(180deg,#081213,#001214);
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(0,255,200,0.06);
+}
+.profile-name{ font-size:1.1rem; color:var(--neon); margin:0; }
+.profile-meta{ color:#bff; font-size:0.82rem; margin-top:4px; opacity:0.95 }
+.profile-list{ margin-top:10px; color:#cfe; font-size:0.9rem; line-height:1.45; }
+.profile-list b{ color:var(--accent); }
+.profile-close{ position:absolute; right:14px; top:12px; background:var(--danger); color:#fff; border:none; padding:6px 8px; border-radius:8px; cursor:pointer; font-weight:700; }
+a.neon-link{color:#00fff2;text-decoration:underline;animation:blinkLink 2s infinite ease-in-out;}
+@keyframes blinkLink{0%,100%{text-shadow:0 0 8px #00fff2;}50%{text-shadow:0 0 16px #00fff2;}}
+
+#dialer{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  height:var(--kbd-height);
+  max-height:70vh;
+  background:linear-gradient(180deg,#020809,#001213);
+  border-top:3px solid rgba(0,255,204,0.06);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  padding:12px calc(12px + env(safe-area-inset-left)) calc(var(--safe-bottom) + 12px) calc(12px + env(safe-area-inset-right));
+  transform:translateY(100%);transition:transform 240ms cubic-bezier(.2,.9,.3,1);z-index:9999;box-shadow:0 -14px 40px rgba(0,0,0,0.7);
+  border-top-left-radius:12px;border-top-right-radius:12px;
+}
+#dialer.open{transform:translateY(0%)}
+#dialer .close{position:absolute;right:12px;top:10px;background:var(--danger);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer}
+.drow{display:flex;gap:10px;width:100%;max-width:420px;justify-content:center}
+.key{flex:1 0 28%;max-width:110px;height:64px;border-radius:12px;background:linear-gradient(180deg,#002f2f,#003b3b);border:1px solid rgba(0,255,204,0.06);display:flex;align-items:center;justify-content:center;color:var(--neon);font-size:22px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.6);user-select:none}
+.key.action{background:linear-gradient(180deg,#003d2c,#00503a);font-size:18}
+.key.wide{flex:1 0 62%;max-width:none}
+
+@media(max-width:480px){
+  .container{margin:8px;padding:14px}
+  #lookupInput{font-size:16px;padding:10px}
+  .key{height:56px;font-size:20px}
+  #terminal{max-height:46vh}
+  .profile-container img{width:40px;height:40px}
+  .profile-container{left:65px;}
+  .premium-badge {
+    top: 12px;
+    right: 12px;
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  .menu-btn {
+    top: 12px;
+    left: 12px;
+    width: 36px;
+    height: 36px;
+  }
+  .sidebar-menu {
+    width: 240px;
+    left: -250px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- MENU BUTTON (3 LINES) -->
+<div class="menu-btn" id="menuBtn">
+  <div class="line"></div>
+  <div class="line"></div>
+  <div class="line"></div>
+</div>
+
+<!-- SIDEBAR MENU WITH ALL PAGES -->
+<div class="sidebar-menu" id="sidebarMenu">
+  <div class="menu-header">
+    <h3 class="menu-title">⚡ INFO TOOL MENU</h3>
+    <div class="menu-user" id="menuUser">Loading...</div>
+  </div>
+  
+  <!-- SECTION 1: MAIN PAGES -->
+  <div class="menu-section">
+    <div class="section-title">Main Navigation</div>
+    <div class="menu-links">
+      <a href="/dashboard.html" class="menu-link" id="menuDashboard">
+        <i class="fas fa-home"></i>
+        <span>🏠 Dashboard</span>
+      </a>
+      
+      <a href="/search.html" class="menu-link" id="menuSearch">
+        <i class="fas fa-search"></i>
+        <span>🔍 Search</span>
+      </a>
+      
+      <a href="/bulk-search.html" class="menu-link badge">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i class="fas fa-layer-group"></i>
+          <span>📊 Bulk Search</span>
+        </div>
+        <span class="badge-tag">NEW</span>
+      </a>
+      
+      <a href="/profile.html" class="menu-link">
+        <i class="fas fa-user"></i>
+        <span>👤 Profile</span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- SECTION 2: PAYMENT & WALLET -->
+  <div class="menu-section">
+    <div class="section-title">Wallet & Credits</div>
+    <div class="menu-links">
+      <a href="/wallet.html" class="menu-link">
+        <i class="fas fa-wallet"></i>
+        <span>💰 Wallet</span>
+      </a>
+      
+      <a href="/add-credits.html" class="menu-link badge">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i class="fas fa-credit-card"></i>
+          <span>💳 Add Credits</span>
+        </div>
+        <span class="badge-tag">HOT</span>
+      </a>
+      
+      <a href="/withdrawal.html" class="menu-link">
+        <i class="fas fa-rupee-sign"></i>
+        <span>💸 Withdraw</span>
+      </a>
+      
+      <a href="/payment-history.html" class="menu-link">
+        <i class="fas fa-history"></i>
+        <span>📜 History</span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- SECTION 3: REFERRAL SYSTEM -->
+  <div class="menu-section">
+    <div class="section-title">Referral & Earnings</div>
+    <div class="menu-links">
+      <a href="/referral.html" class="menu-link badge">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i class="fas fa-users"></i>
+          <span>👥 Referrals</span>
+        </div>
+        <span class="badge-tag">₹ EARN</span>
+      </a>
+      
+      <a href="/referral-network.html" class="menu-link">
+        <i class="fas fa-sitemap"></i>
+        <span>🌐 Network</span>
+      </a>
+      
+      <a href="/earnings.html" class="menu-link">
+        <i class="fas fa-chart-line"></i>
+        <span>📈 Earnings</span>
+      </a>
+      
+      <a href="/withdrawal-history.html" class="menu-link">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <span>🏦 Withdrawal History</span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- SECTION 4: DEVELOPER FEATURES -->
+  <div class="menu-section">
+    <div class="section-title">Developer Tools</div>
+    <div class="menu-links">
+      <a href="/developer-dashboard.html" class="menu-link">
+        <i class="fas fa-code"></i>
+        <span>💻 Developer</span>
+      </a>
+      
+      <a href="/api-management.html" class="menu-link">
+        <i class="fas fa-key"></i>
+        <span>🔑 API Keys</span>
+      </a>
+      
+      <a href="/website-settings.html" class="menu-link">
+        <i class="fas fa-globe"></i>
+        <span>🌍 Website Settings</span>
+      </a>
+      
+      <a href="/search-history.html" class="menu-link">
+        <i class="fas fa-database"></i>
+        <span>🗃️ Search History</span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- SECTION 5: ADMIN PANEL (SHOW ONLY FOR ADMINS) -->
+  <div class="menu-section" id="adminSection" style="display:none;">
+    <div class="section-title">Admin Panel</div>
+    <div class="menu-links">
+      <a href="/admin-dashboard.html" class="menu-link badge">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i class="fas fa-crown"></i>
+          <span>👑 Admin</span>
+        </div>
+        <span class="badge-tag">ADMIN</span>
+      </a>
+      
+      <a href="/admin-users.html" class="menu-link">
+        <i class="fas fa-user-friends"></i>
+        <span>👥 Users</span>
+      </a>
+      
+      <a href="/admin-payments.html" class="menu-link">
+        <i class="fas fa-money-check-alt"></i>
+        <span>💳 Payments</span>
+      </a>
+      
+      <a href="/admin-withdrawals.html" class="menu-link">
+        <i class="fas fa-hand-holding-usd"></i>
+        <span>💰 Withdrawals</span>
+      </a>
+      
+      <a href="/admin-reports.html" class="menu-link">
+        <i class="fas fa-chart-pie"></i>
+        <span>📊 Reports</span>
+      </a>
+      
+      <a href="/admin-settings.html" class="menu-link">
+        <i class="fas fa-cogs"></i>
+        <span>⚙️ Settings</span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- SECTION 6: SUPPORT & LEGAL -->
+  <div class="menu-section">
+    <div class="section-title">Support & Legal</div>
+    <div class="menu-links">
+      <a href="/support.html" class="menu-link">
+        <i class="fas fa-headset"></i>
+        <span>📞 Support</span>
+      </a>
+      
+      <a href="/faq.html" class="menu-link">
+        <i class="fas fa-question-circle"></i>
+        <span>❓ FAQ</span>
+      </a>
+      
+      <a href="/terms.html" class="menu-link">
+        <i class="fas fa-file-contract"></i>
+        <span>📄 Terms</span>
+      </a>
+      
+      <a href="/privacy-policy.html" class="menu-link">
+        <i class="fas fa-shield-alt"></i>
+        <span>🔒 Privacy</span>
+      </a>
+    </div>
+  </div>
+  
+  <!-- FOOTER WITH LOGOUT -->
+  <div class="menu-footer">
+    <button class="logout-btn" id="menuLogoutBtn">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </button>
+  </div>
+</div>
+
+<!-- PREMIUM BADGE ADDED HERE -->
+<div class="premium-badge">Premium v2.0</div>
+
+<!-- PROFILE ICON CONTAINER - TOP LEFT (DEVELOPER WALA) -->
+<div class="profile-container">
+  <img src="https://img2.wallspic.com/previews/8/0/7/0/8/180708/180708-anonymous_mask-mask-hacker-security_hacker-face-360x640.jpg" id="profileIcon" alt="profile">
+  <div class="profile-text" id="profileText">【D̴e̴v̴e̴l̴o̴p̴e̴r̴】</div>
+</div>
+
+<!-- PROFILE OVERLAY - DEVELOPER WALA -->
+<div class="profile-overlay" id="profileOverlay">
+  <div class="profile-card">
+    <button class="profile-close" id="profileClose">×</button>
+    <div class="profile-head">
+      <div class="hacker-logo">
+        <img src="https://img2.wallspic.com/previews/8/0/7/0/8/180708/180708-anonymous_mask-mask-hacker-security_hacker-face-360x640.jpg" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      <div>
+        <h3 class="profile-name">🅷🅰🅿🅿🆈 🌟🌟🌟</h3>
+        <div class="profile-meta">▄︻デH̷a̷c̷k̷e̷r̷══━一 vibes • Focused • Online</div>
+      </div>
+    </div>
+    <div class="profile-list">
+      <div><b>𓊈𒆜🔞 Age:</b> 16𒆜𓊉</div>
+      <div><b>𓊈𒆜♂️ Gender:</b> Male𒆜𓊉</div>
+      <div><b>𓊈𒆜📚 Education:</b> 9th Fail𒆜𓊉</div>
+      <div><b>𓊈𒆜🏠 From:</b> earth𒆜𓊉</div>
+      <div><b>𓊈𒆜🤔 Interest:</b> Tech & Trick𒆜𓊉</div>
+      <div><b>𓊈𒆜❤️ Status:</b> Single (Focus On Carier)𒆜𓊉</div>
+      <div style="margin-top:8px;"><b> 𓊈𒆜📞Contact:</b>
+        <a class="neon-link" href="https://t.me/Royal_smart_boy" target="_blank">@Royal_smart_boy𒆜𓊉</a>
+        <span style="color:#9ff"> — Just say Hi!</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main UI -->
+<div class="container-wrap">
+  <div class="container" id="mainContainer">
+    <div class="header">
+      <h1>⚡▄︻デH̷A̷P̷P̷Y̷══━一 🥰PHONE OR 🆔  TO DATA SEARCH PRO V2.0⚡</h1>
+      <p class="meta">Enter Phone or 🆔 get data</p>
+    </div>
+    <!-- Search Input - WAPAS PEHLE JAISA (NO GLOW) -->
+    <input id="lookupInput" readonly placeholder="ENTER TARGET PHONE OR ID">
+    <div class="actions">
+      <button id="lookupBtn" class="btn">Search 🔎</button>
+      <button id="clearBtn" class="btn">Clear🧹</button>
+    </div>
+  </div>
+</div>
+
+<div id="terminal" aria-live="polite">
+  <div class="line">happy@osint:~$ waiting for new target...</div>
+</div>
+
+<!-- Dialer -->
+<div id="dialer" aria-hidden="true" role="application" aria-label="Numeric dialer">
+  <button class="close" id="closeDialer">×</button>
+  <div class="drow"><div class="key">1</div><div class="key">2</div><div class="key">3</div></div>
+  <div class="drow"><div class="key">4</div><div class="key">5</div><div class="key">6</div></div>
+  <div class="drow"><div class="key">7</div><div class="key">8</div><div class="key">9</div></div>
+  <div class="drow"><div class="key action" id="delKey">⌫</div><div class="key">0</div><div class="key action" id="enterKey">✓</div></div>
+</div>
+
+<!-- Add Font Awesome -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+<script>
+// Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAVGRG-rLimmEnodt9Vg4UihRPyeyh0cUw",
+  authDomain: "happy-8530b.firebaseapp.com",
+  databaseURL: "https://happy-8530b-default-rtdb.firebaseio.com",
+  projectId: "happy-8530b",
+  storageBucket: "happy-8530b.firebasestorage.app",
+  messagingSenderId: "294612089252",
+  appId: "1:294612089252:web:73c11460f18de97165e931",
+  measurementId: "G-GCMNZ4XREK"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
+// App State
+let currentUser = null;
+let userProfile = null;
+let userCredits = 0;
+
+// DOM Elements
+const menuBtn = document.getElementById('menuBtn');
+const sidebarMenu = document.getElementById('sidebarMenu');
+const menuUser = document.getElementById('menuUser');
+const menuLogoutBtn = document.getElementById('menuLogoutBtn');
+const adminSection = document.getElementById('adminSection');
+const profileIcon = document.getElementById('profileIcon');
+const profileText = document.getElementById('profileText');
+const profileOverlay = document.getElementById('profileOverlay');
+const profileClose = document.getElementById('profileClose');
+const lookupInput = document.getElementById('lookupInput');
+const lookupBtn = document.getElementById('lookupBtn');
+const clearBtn = document.getElementById('clearBtn');
+const terminal = document.getElementById('terminal');
+const dialer = document.getElementById('dialer');
+const closeDialer = document.getElementById('closeDialer');
+
+// ===== MENU FUNCTIONALITY =====
+menuBtn.addEventListener('click', () => {
+  menuBtn.classList.toggle('active');
+  sidebarMenu.classList.toggle('open');
+});
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+  if (!menuBtn.contains(e.target) && !sidebarMenu.contains(e.target)) {
+    menuBtn.classList.remove('active');
+    sidebarMenu.classList.remove('open');
+  }
+});
+
+// ===== PROFILE FUNCTIONALITY =====
+function openProfile(){
+  profileOverlay.classList.add('open');
+}
+function closeProfile(){
+  profileOverlay.classList.remove('open');
+}
+profileIcon.addEventListener('click', openProfile);
+profileText.addEventListener('click', openProfile);
+profileClose.addEventListener('click', closeProfile);
+profileOverlay.addEventListener('click', e=>{ if(e.target===profileOverlay) closeProfile(); });
+
+// ===== AUTH STATE CHECK =====
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    await loadUserProfile(user.uid);
+    
+    // Update menu user info
+    menuUser.textContent = userProfile.name || user.email;
+    
+    // Check if user is admin
+    if (userProfile.user_type === 'admin') {
+      adminSection.style.display = 'block';
+    }
+    
+    // Show welcome message
+    terminal.innerHTML = '';
+    typeLine(`happy@osint:~$ Welcome, ${userProfile.name || 'User'}!`, 'c3', 8);
+    typeLine(`[+] Credits available: ${userCredits}`, 'c1', 12);
+    typeLine('[+] Ready for OSINT operations', 'c4', 12);
+    typeLine('[+] Click menu button for all pages', 'c2', 12);
+  } else {
+    // Not logged in, redirect to login page
+    window.location.href = '/login.html';
+  }
+});
+
+// ===== LOAD USER PROFILE =====
+async function loadUserProfile(uid) {
+  try {
+    const snapshot = await database.ref(`users/${uid}`).once('value');
+    const data = snapshot.val();
+    
+    if (data) {
+      userProfile = data;
+      userCredits = data.credits || 0;
+    } else {
+      // Create user profile if doesn't exist
+      userProfile = {
+        name: currentUser.displayName || currentUser.email.split('@')[0],
+        email: currentUser.email,
+        credits: 10, // Default credits
+        user_type: 'regular',
+        total_searches: 0,
+        total_referrals: 0,
+        total_earned: 0,
+        created_at: new Date().toISOString()
+      };
+      
+      await database.ref(`users/${uid}`).set(userProfile);
+      userCredits = 10;
+    }
+    
+  } catch (error) {
+    console.error('Error loading user profile:', error);
+    showTerminalError('Failed to load profile data');
+  }
+}
+
+// ===== LOGOUT FUNCTION =====
+menuLogoutBtn.addEventListener('click', async () => {
+  try {
+    await auth.signOut();
+    window.location.href = '/login.html';
+  } catch (error) {
+    console.error('Logout error:', error);
+    showTerminalError('Logout failed. Please try again.');
+  }
+});
+
+// ===== MENU LINKS HANDLING =====
+document.querySelectorAll('.menu-link').forEach(link => {
+  link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    
+    // Close menu
+    menuBtn.classList.remove('active');
+    sidebarMenu.classList.remove('open');
+    
+    const href = link.getAttribute('href');
+    const pageName = link.querySelector('span').textContent;
+    
+    // Check if user is logged in for protected pages
+    const protectedPages = [
+      'dashboard', 'profile', 'wallet', 'add-credits', 
+      'withdrawal', 'referral', 'developer', 'admin'
+    ];
+    
+    const page = href.split('/').pop().replace('.html', '');
+    
+    if (protectedPages.some(p => page.includes(p)) && !currentUser) {
+      showTerminalError('Please login to access this page');
+      window.location.href = '/login.html';
+      return;
+    }
+    
+    // Check if user is admin for admin pages
+    const adminPages = ['admin-dashboard', 'admin-users', 'admin-payments', 'admin-withdrawals'];
+    if (adminPages.includes(page) && userProfile.user_type !== 'admin') {
+      showTerminalError('Admin access required');
+      return;
+    }
+    
+    // Show loading message
+    terminal.innerHTML = '';
+    typeLine(`happy@osint:~$ Loading ${pageName}...`, 'c2', 8);
+    
+    // Try to navigate to the page
+    try {
+      // First check if page exists
+      const response = await fetch(href, { method: 'HEAD' });
+      
+      if (response.ok) {
+        // Page exists, redirect
+        setTimeout(() => {
+          window.location.href = href;
+        }, 500);
+      } else {
+        // Page doesn't exist, show message
+        showTerminalMessage(`⚠️ ${pageName} page is under development.`);
+        showTerminalMessage(`Coming soon... Check back later.`);
+        
+        // Create a demo page content based on page type
+        createDemoPageContent(page);
+      }
+    } catch (error) {
+      // Page doesn't exist
+      showTerminalMessage(`⚠️ ${pageName} page is under development.`);
+      showTerminalMessage(`Creating ${page} functionality...`);
+      
+      // Create a demo page content based on page type
+      createDemoPageContent(page);
+    }
+  });
+});
+
+// Function to create demo content for pages that don't exist yet
+function createDemoPageContent(page) {
+  setTimeout(() => {
+    terminal.innerHTML = '';
+    
+    switch(page) {
+      case 'dashboard':
+        typeLine('happy@osint:~$ DASHBOARD LOADED', 'c2', 8);
+        typeLine('────────────────────────', 'c1', 4);
+        typeLine('📊 Quick Stats:', 'c3', 8);
+        typeLine(`💰 Credits: ${userCredits}`, 'c4', 8);
+        typeLine(`🔍 Searches Today: 5`, 'c2', 8);
+        typeLine(`👥 Referrals: ${userProfile.total_referrals || 0}`, 'c1', 8);
+        typeLine(`💸 Earned: ₹${userProfile.total_earned || 0}`, 'c3', 8);
+        typeLine('', '', 4);
+        typeLine('🚀 Quick Actions:', 'c3', 8);
+        typeLine('1. 🔍 Search - Find information', 'c1', 8);
+        typeLine('2. 💳 Add Credits - Buy more searches', 'c2', 8);
+        typeLine('3. 👥 Referrals - Earn money', 'c4', 8);
+        break;
+        
+      case 'profile':
+        typeLine('happy@osint:~$ PROFILE SETTINGS', 'c2', 8);
+        typeLine('──────────────────────────', 'c1', 4);
+        typeLine(`👤 Name: ${userProfile.name || 'Not set'}`, 'c3', 8);
+        typeLine(`📧 Email: ${currentUser.email}`, 'c1', 8);
+        typeLine(`🔑 User Type: ${userProfile.user_type || 'regular'}`, 'c2', 8);
+        typeLine('', '', 4);
+        typeLine('⚙️ Settings:', 'c3', 8);
+        typeLine('• Change Password', 'c1', 8);
+        typeLine('• Update Profile Picture', 'c2', 8);
+        typeLine('• Notification Settings', 'c4', 8);
+        typeLine('• Privacy Controls', 'c5', 8);
+        break;
+        
+      case 'wallet':
+        typeLine('happy@osint:~$ WALLET OVERVIEW', 'c2', 8);
+        typeLine('──────────────────────────', 'c1', 4);
+        typeLine(`💰 Available Balance: ${userCredits} credits`, 'c4', 8);
+        typeLine(`💳 Total Spent: ₹${userProfile.total_spent || 0}`, 'c1', 8);
+        typeLine(`💸 Total Earned: ₹${userProfile.total_earned || 0}`, 'c3', 8);
+        typeLine(`🏦 Total Withdrawn: ₹${userProfile.total_withdrawn || 0}`, 'c2', 8);
+        typeLine('', '', 4);
+        typeLine('📊 Recent Transactions:', 'c3', 8);
+        typeLine('1. +10 credits - Signup Bonus', 'c1', 8);
+        typeLine('2. -1 credit - Phone Search', 'c5', 8);
+        typeLine('3. +₹50 - Referral Earnings', 'c4', 8);
+        break;
+        
+      case 'referral':
+        typeLine('happy@osint:~$ REFERRAL SYSTEM', 'c2', 8);
+        typeLine('──────────────────────────', 'c1', 4);
+        typeLine('👥 Your Referral Code:', 'c4', 8);
+        typeLine(`🔗 ${userProfile.referral_code || 'HAPPY-REF-123'}`, 'c3', 8);
+        typeLine('', '', 4);
+        typeLine('💰 Earning Potential:', 'c3', 8);
+        typeLine('• Direct Referral: ₹10 per search', 'c1', 8);
+        typeLine('• Level 2 Referral: ₹5 per search', 'c2', 8);
+        typeLine('• Level 3 Referral: ₹2 per search', 'c4', 8);
+        typeLine('', '', 4);
+        typeLine('📈 Your Network:', 'c3', 8);
+        typeLine(`• Direct Referrals: ${userProfile.total_referrals || 0}`, 'c1', 8);
+        typeLine('• Total Earnings: ₹' + (userProfile.total_earned || 0), 'c4', 8);
+        break;
+        
+      case 'developer':
+        typeLine('happy@osint:~$ DEVELOPER DASHBOARD', 'c2', 8);
+        typeLine('──────────────────────────────', 'c1', 4);
+        typeLine('🔑 API Configuration:', 'c3', 8);
+        typeLine('• API Key: ********************', 'c1', 8);
+        typeLine('• Rate Limit: 1000 requests/hour', 'c2', 8);
+        typeLine('• Webhook URL: Not set', 'c4', 8);
+        typeLine('', '', 4);
+        typeLine('🌍 Website Integration:', 'c3', 8);
+        typeLine('• Allowed Domains: 0/5', 'c1', 8);
+        typeLine('• IP Whitelist: Disabled', 'c2', 8);
+        typeLine('• Direct Calls: Enabled', 'c4', 8);
+        break;
+        
+      default:
+        typeLine('happy@osint:~$ PAGE PREVIEW', 'c2', 8);
+        typeLine('────────────────────────', 'c1', 4);
+        typeLine(`This is the ${page.toUpperCase()} page.`, 'c3', 8);
+        typeLine('Full functionality coming soon!', 'c4', 8);
+        typeLine('', '', 4);
+        typeLine('🔧 Features to expect:', 'c3', 8);
+        typeLine('• Complete user interface', 'c1', 8);
+        typeLine('• Real-time data updates', 'c2', 8);
+        typeLine('• Advanced analytics', 'c4', 8);
+        typeLine('• Export functionality', 'c5', 8);
+    }
+    
+    typeLine('', '', 4);
+    typeLine('✅ This is a preview. Actual page coming soon!', 'c4', 8);
+  }, 300);
+}
+
+// ===== SEARCH FUNCTIONALITY =====
+let dialerOpen = false;
+
+function openDialer() {
+  if (dialerOpen) return;
+  dialer.classList.add('open');
+  dialerOpen = true;
+}
+
+function closeDialerFn() {
+  if (!dialerOpen) return;
+  dialer.classList.remove('open');
+  dialerOpen = false;
+}
+
+lookupInput.addEventListener('click', openDialer);
+closeDialer.addEventListener('click', closeDialerFn);
+
+// Dialer key handling
+dialer.addEventListener('click', (e) => {
+  const key = e.target.closest('.key');
+  if (!key) return;
+  
+  if (key.id === 'delKey') {
+    lookupInput.value = lookupInput.value.slice(0, -1);
+    return;
+  }
+  
+  if (key.id === 'enterKey') {
+    performSearch();
+    closeDialerFn();
+    return;
+  }
+  
+  const ch = key.textContent.trim();
+  if (ch && /^[0-9]$/.test(ch) && lookupInput.value.length < 15) {
+    lookupInput.value += ch;
+  }
+});
+
+// ===== PERFORM SEARCH =====
+async function performSearch() {
+  const input = lookupInput.value.replace(/\D/g, '').trim();
+  
+  if (!input) {
+    showTerminalError('Please enter a phone or Aadhaar number');
+    return;
+  }
+  
+  if (!currentUser) {
+    showTerminalError('Please login to perform search');
+    return;
+  }
+  
+  // Check credits
+  if (userCredits <= 0) {
+    showTerminalError('Insufficient credits. Please add credits to continue.');
+    return;
+  }
+  
+  terminal.innerHTML = '';
+  
+  await typeLine(`happy@osint:~$ Searching: ${input}`, '', 8);
+  await delay(200);
+  await typeLine('[+] Initializing connection...', 'c1', 12);
+  
+  // Determine search type
+  let apiUrl, searchType;
+  if (input.length === 10) {
+    apiUrl = `/api/search?number=${encodeURIComponent(input)}`;
+    searchType = 'phone';
+    await typeLine('[+] Phone number detected', 'c3', 12);
+  } else if (input.length === 12) {
+    apiUrl = `/api/search?aadhaar=${encodeURIComponent(input)}`;
+    searchType = 'aadhaar';
+    await typeLine('[+] Aadhaar number detected', 'c3', 12);
+  } else {
+    showTerminalError('Invalid input. Must be 10-digit phone or 12-digit Aadhaar');
+    return;
+  }
+  
+  await delay(300);
+  await typeLine('[+] Connecting to database...', 'c2', 12);
+  await delay(400);
+  
+  try {
+    const token = await currentUser.getIdToken();
+    
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Search failed');
+    }
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      // Update user credits
+      userCredits = data.credits?.remaining || userCredits - 1;
+      userProfile.total_searches = (userProfile.total_searches || 0) + 1;
+      
+      // Update database
+      await database.ref(`users/${currentUser.uid}`).update({
+        credits: userCredits,
+        total_searches: userProfile.total_searches
+      });
+      
+      // Display results
+      displaySearchResults(data);
+    } else {
+      showTerminalError(data.error || 'Search failed');
+    }
+    
+  } catch (error) {
+    console.error('Search error:', error);
+    showTerminalError(error.message || 'Search failed. Please try again.');
+  }
+}
+
+function displaySearchResults(data) {
+  typeLine('[+] Search completed successfully!', 'c4', 12);
+  typeLine(`[+] Credits remaining: ${userCredits}`, 'c3', 12);
+  
+  if (data.data) {
+    typeLine('', '', 4);
+    typeLine('📊 SEARCH RESULTS:', 'c2', 8);
+    typeLine('────────────────', 'c1', 4);
+    
+    const result = data.data.data || data.data;
+    
+    // Display basic info
+    if (result.name) {
+      typeLine(`👤 Name: ${result.name}`, 'c3', 8);
+    }
+    
+    if (result.address) {
+      typeLine(`🏠 Address: ${result.address}`, 'c1', 8);
+    }
+    
+    if (result.email) {
+      typeLine(`📧 Email: ${result.email}`, 'c2', 8);
+    }
+    
+    if (result.phone_numbers && result.phone_numbers.length > 0) {
+      typeLine(`📞 Phone Numbers:`, 'c4', 8);
+      result.phone_numbers.forEach(phone => {
+        typeLine(`   • ${phone}`, 'c5', 8);
+      });
+    }
+    
+    // Display other available data
+    const displayFields = [
+      'father_name', 'mother_name', 'dob', 'gender',
+      'voter_id', 'pan_number', 'driving_license'
+    ];
+    
+    displayFields.forEach(field => {
+      if (result[field]) {
+        typeLine(`${field.replace('_', ' ').toUpperCase()}: ${result[field]}`, 'c1', 8);
+      }
+    });
+    
+    typeLine('', '', 4);
+    typeLine('✅ Search completed at ' + new Date().toLocaleTimeString(), 'c4', 8);
+  }
+}
+
+lookupBtn.addEventListener('click', performSearch);
+clearBtn.addEventListener('click', () => {
+  lookupInput.value = '';
+  terminal.innerHTML = '';
+  typeLine('happy@osint:~$ Terminal cleared.', 'c3', 8);
+});
+
+// ===== TERMINAL FUNCTIONS =====
+async function typeLine(text, cls = '', speed = 16) {
+  return new Promise(resolve => {
+    const span = document.createElement('div');
+    span.className = `line ${cls}`.trim();
+    terminal.appendChild(span);
+    let i = 0;
+    
+    function step() {
+      if (i < text.length) {
+        span.textContent += text.charAt(i++);
+        terminal.scrollTop = terminal.scrollHeight;
+        setTimeout(step, speed + Math.random() * 8);
+      } else {
+        resolve();
+      }
+    }
+    
+    step();
+  });
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function showTerminalMessage(message, type = 'info') {
+  const color = type === 'error' ? 'c5' : type === 'success' ? 'c4' : 'c2';
+  typeLine(`[${type === 'error' ? '-' : '+'}] ${message}`, color, 10);
+}
+
+function showTerminalError(message) {
+  showTerminalMessage(message, 'error');
+}
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Close dialer when clicking outside
+  dialer.addEventListener('click', (e) => {
+    if (e.target === dialer) {
+      closeDialerFn();
+    }
+  });
+  
+  // Escape key closes dialer
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && dialerOpen) {
+      closeDialerFn();
+    }
+  });
+  
+  // Initial terminal message
+  setTimeout(() => {
+    if (!currentUser) {
+      terminal.innerHTML = '';
+      typeLine('happy@osint:~$ Please login to continue...', 'c5', 8);
+      typeLine('[+] Click menu button for options', 'c2', 12);
+    }
+  }, 1000);
+});
+</script>
+</body>
+</html>
